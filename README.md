@@ -407,6 +407,12 @@ Check that kubectl is properly configured by getting the cluster state:
 $ kubectl cluster-info
 If you see a url response, you are ready to go.
 
+### Deleting the Cluster
+
+```bash
+$ chimay kops delete cluster useast1.dev.continuul.io --yes
+```
+
 ## Software Versions Included
 
 The following is the list of installed software and their versions:
@@ -417,4 +423,4 @@ The following is the list of installed software and their versions:
 - virtualenv (15.1.0)
 - awscli (1.11.68)
 - kubectl (1.6.0)
-- kops (1.4.1)
+- kops (1.5.3)
