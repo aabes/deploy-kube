@@ -3,7 +3,7 @@
 VERSION := 0.1.0
 
 BINARY := deploy-kube.tar
-SOURCE := Dockerfile
+SOURCE := Dockerfile docker-entrypoint.sh
 
 DOCKER_IMAGE := continuul/deploy-kube
 
