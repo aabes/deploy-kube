@@ -13,7 +13,7 @@ RUN curl -LO ${KUBE_PACKAGES_URL}/$(curl -s ${KUBE_PACKAGES_URL}/stable.txt)/bin
     && chmod +x ./kubectl \
     && mv ./kubectl /usr/local/bin/kubectl
 
-RUN wget https://github.com/kubernetes/kops/releases/download/v1.5.3/kops-linux-amd64 \
+RUN wget https://github.com/kubernetes/kops/releases/download/1.5.3/kops-linux-amd64 \
     && chmod +x kops-linux-amd64 \
     && mv kops-linux-amd64 /usr/local/bin/kops
 

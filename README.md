@@ -18,7 +18,9 @@ We're going to be using Docker as a tool to deploy Kubernetes. To keep the comma
 simpler let's set up an alias after our favorite beer:
 
 ```
-alias chimay='docker run -e KOPS_STATE_STORE=s3://clusters.dev.continuul.io --privileged -it -v /etc/localtime:/etc/localtime:ro -v $(pwd)/aws:/root/.aws -v $(pwd)/r53-ns-batch.json:/tmp/r53-ns-batch.json -v $(pwd)/kube:/root/.kube -v $(pwd)/ssh:/root/.ssh:ro continuul/deploy-kube:0.1.0'
+export NAME=k8s-test-cluster
+export KOPS_STATE_STORE=s3://clusters.dev.continuul.io
+alias chimay='docker run -e NAME=${NAME} -e KOPS_STATE_STORE=${KOPS_STATE_STORE} -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} --privileged -it -v /etc/localtime:/etc/localtime:ro -v $(pwd)/aws:/root/.aws -v $(pwd)/r53-ns-batch.json:/tmp/r53-ns-batch.json -v $(pwd)/kube:/root/.kube -v $(pwd)/ssh:/root/.ssh:ro continuul/deploy-kube:0.1.0'
 ```
 
 ### 0. Set up AWS Credentials
@@ -35,6 +37,14 @@ $ cat aws/credentials
  aws_secret_access_key = ****
 ```
 
+## Set up DNS
+
+Two options exist, to use a private domain, or have one publicly accessible. First the private
+domain:
+
+```bash
+tbd...
+```
 
 ### 1. Create a Route53 Domain for your Cluster
 
@@ -160,17 +170,23 @@ Using the parent zone, above, apply the change:
 $ chimay aws route53 change-resource-record-sets --hosted-zone-id Z1A77WSH128J3T --change-batch file:///tmp/r53-ns-batch.json
 ```
 
-### 2. Create an S3 Bucket to Store Clusters State
+### 2. Cluster State Storage
 
 ```
 $ chimay aws s3 mb s3://clusters.dev.continuul.io
  make_bucket: clusters.dev.continuul.io
 ```
 
+And we strongly recommend versioning...
+
+```bash
+chimay aws s3api put-bucket-versioning --bucket clusters.dev.continuul.io --versioning-configuration Status=Enabled
+```
+
 ### Build your Cluster Configuration
 
-```
-chimay kops create cluster --zones=us-east-1c useast1.dev.continuul.io
+```bash
+chimay kops create cluster --dns private --associate-public-ip=false --networking=weave --topology=private --zones=us-east-1c ${NAME}
 ```
 
 Sample Output:
@@ -383,13 +399,13 @@ Finally configure your cluster with: kops update cluster useast1.dev.continuul.i
 ### Create the Cluster
 
 ```text
-chimay kops update cluster useast1.dev.continuul.io --yes
+chimay kops update cluster ${NAME} --yes
 ```
 
 ### Export the Kube Config
 
 ```text
-chimay kops export kubecfg useast1.dev.continuul.io
+chimay kops export kubecfg ${NAME}
 ```
 
 Now lets test this...
@@ -410,7 +426,7 @@ If you see a url response, you are ready to go.
 ### Deleting the Cluster
 
 ```bash
-$ chimay kops delete cluster useast1.dev.continuul.io --yes
+$ chimay kops delete cluster ${NAME} --yes
 ```
 
 ## Software Versions Included
